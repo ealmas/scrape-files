@@ -5,15 +5,15 @@ from bs4 import BeautifulSoup as soup
 from time import sleep
 from random import randint
 
-pages = [str(i) for i in range(1,119)]
+pages = [str(i) for i in range(1,46)]
 
-filename = "digikey_crystal.csv"
+filename = "digikey_interface.csv"
 f = open(filename, "w")
-header = "d_partnumber; mfg_partnumber; manufacturer; description; qty_available; unit_price; min_qty; packaging; series; status; typee; frequence; freq_stability; freq_tolerance; load_capacitance; esr; operating_mode;operating_temperature; ratings; mounting_type; package_case; size_dimension; height_seated\n"
+header = "d_partnumber; mfg_partnumber; manufacturer; description; qty_available; unit_price; min_qty; packaging; series; status; typee; protocol; drivers_receivers; duplex; receiver_hysteresis; data_rate; voltage_supply; operating_temperature; mounting_type; package_case; supplier_package\n"
 
 for page in pages:
 
-    my_url = 'https://www.digikey.com/products/en/crystals-oscillators-resonators/crystals/171?FV=ffe000ab&quantity=0&ColumnSort=0&pageSize=500&page=' + page
+    my_url = 'https://www.digikey.com/products/en/integrated-circuits-ics/interface-drivers-receivers-transceivers/710?FV=ffe002c6&quantity=0&ColumnSort=0&pageSize=500&page=' + page
     user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
     headers = {'User-Agent': user_agent}
 
@@ -74,57 +74,51 @@ for page in pages:
 	    except IndexError:
 	    	typee = 'null'
 
-	    frq = container.find_all("td",{"class":"CLS 2150 ptable-param"})
+	    prtcl = container.find_all("td",{"class":"CLS 578 ptable-param"})
 	    try:
-	    	freq = frq[0].text.strip()
+	    	protocol = prtcl[0].text.strip()
 	    except IndexError:
-	    	freq = 'null'
+	    	protocol = 'null'
 
-	    frq_s = container.find_all("td",{"class":"CLS 253 ptable-param"})
+	    drvrs = container.find_all("td",{"class":"CLS 404 ptable-param"})
 	    try:
-	    	freq_stability = frq_s[0].text.strip()
+	    	drivers_receivers = drvrs[0].text.strip()
 	    except IndexError:
-	    	freq_stability = 'null'
+	    	drivers_receivers = 'null'
 
-	    frq_t = container.find_all("td",{"class":"CLS 537 ptable-param"})
+	    dplx = container.find_all("td",{"class":"CLS 1684 ptable-param"})
 	    try:
-	    	freq_tolerance = frq_t[0].text.strip()
+	    	duplex = dplx[0].text.strip()
 	    except IndexError:
-	    	freq_tolerance = 'null'
+	    	duplex = 'null'
 
-	    load = container.find_all("td",{"class":"CLS 35 ptable-param"})
+	    hystrss = container.find_all("td",{"class":"CLS 0 ptable-param"})
 	    try:
-	    	load_capacitance = load[0].text.strip()
+	    	receiver_hysteresis = hystrss[0].text.strip()
 	    except IndexError:
-	    	load_capacitance = 'null'
+	    	receiver_hysteresis = 'null'
 
-	    esr = container.find_all("td",{"class":"CLS 2082 ptable-param"})
+	    rate = container.find_all("td",{"class":"CLS 448 ptable-param"})
 	    try:
-	    	e_s_resistance = esr[0].text.strip()
+	    	data_rate = rate[0].text.strip()
 	    except IndexError:
-	    	e_s_resistance = 'null'
+	    	data_rate = 'null'
 
-	    o_m = container.find_all("td",{"class":"CLS 538 ptable-param"})
+	    vltg = container.find_all("td",{"class":"CLS 276 ptable-param"})
 	    try:
-	    	operating_mode = o_m[0].text.strip()
+	    	voltage_supply = vltg[0].text.strip()
 	    except IndexError:
-	    	operating_mode = 'null'
+	    	voltage_supply = 'null'
 
-	    o_t = container.find_all("td",{"class":"CLS 252 ptable-param"})
+	    tmprtr = container.find_all("td",{"class":"CLS 252 ptable-param"})
 	    try:
-	    	operating_temperature = o_t[0].text.strip()
+	    	operating_temperature = tmprtr[0].text.strip()
 	    except IndexError:
 	    	operating_temperature = 'null'
 
-	    rtng = container.find_all("td",{"class":"CLS 707 ptable-param"})
+	    mntng = container.find_all("td",{"class":"CLS 69 ptable-param"})
 	    try:
-	    	rating = rtng[0].text.strip()
-	    except IndexError:
-	    	rating = 'null'
-
-	    mntg = container.find_all("td",{"class":"CLS 69 ptable-param"})
-	    try:
-	    	mounting_type = mntg[0].text.strip()
+	    	mounting_type = mntng[0].text.strip()
 	    except IndexError:
 	    	mounting_type = 'null'
 
@@ -134,17 +128,11 @@ for page in pages:
 	    except IndexError:
 	    	package_case = 'null'
 
-	    size = container.find_all("td",{"class":"CLS 46 ptable-param"})
+	    sp = container.find_all("td",{"class":"CLS 1291 ptable-param"})
 	    try:
-	    	size_dimension = size[0].text.strip()
+	    	supplier_package = sp[0].text.strip()
 	    except IndexError:
-	    	size_dimension = 'null'
-
-	    hght = container.find_all("td",{"class":"CLS 1500 ptable-param"})
-	    try:
-	    	height_seated = hght[0].text.strip()
-	    except IndexError:
-	    	height_seated = 'null'
+	    	supplier_package = 'null'
 
 	    #print("part_numbers; " + part_numbers)
 	    #print("price; " + price)
@@ -175,7 +163,7 @@ for page in pages:
 	    #print("size_dimension; " + size_dimension)
 	    #print("height_seated; " + height_seated)
 
-	    f.write(part_numbers_d + ";" + part_numbers + ";" + manufacturer + ";" + description + ";" + qty_available + ";" + price + ";" + min_qty + ";" + packaging + ";" + series + ";" + status + ";" + typee + ";" +  freq + ";" + freq_stability + ";" + freq_tolerance + ";" + load_capacitance + ";" + e_s_resistance + ";" + operating_mode + ";" + operating_temperature + ";" + rating + ";" + mounting_type + ";" + package_case  + ";" + size_dimension + ";" + height_seated + "\n")
+	    f.write(part_numbers_d + ";" + part_numbers + ";" + manufacturer + ";" + description + ";" + qty_available + ";" + price + ";" + min_qty + ";" + packaging + ";" + series + ";" + status + ";" + typee + ";" +  protocol + ";" + drivers_receivers + ";" + duplex + ";" + receiver_hysteresis + ";" + data_rate + ";" + voltage_supply + ";" + operating_temperature + ";" + mounting_type + ";" + package_case + ";" + supplier_package + "\n")
     
     print(page)
 

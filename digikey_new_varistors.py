@@ -5,15 +5,15 @@ from bs4 import BeautifulSoup as soup
 from time import sleep
 from random import randint
 
-pages = [str(i) for i in range(1,119)]
+pages = [str(i) for i in range(1,34)]
 
-filename = "digikey_crystal.csv"
+filename = "digikey_varistors.csv"
 f = open(filename, "w")
-header = "d_partnumber; mfg_partnumber; manufacturer; description; qty_available; unit_price; min_qty; packaging; series; status; typee; frequence; freq_stability; freq_tolerance; load_capacitance; esr; operating_mode;operating_temperature; ratings; mounting_type; package_case; size_dimension; height_seated\n"
+header = "d_partnumber; mfg_partnumber; manufacturer; description; qty_available; unit_price; min_qty; packaging; series; status; max_AC_volts; max_DC_volts; varistor_voltage_min; varistor_voltage_typ; varistor_voltage_max; current_surge; energy; number_of_circuits; capacitance_frequency; operating_temperature; features; mounting_type; package_case\n"
 
 for page in pages:
 
-    my_url = 'https://www.digikey.com/products/en/crystals-oscillators-resonators/crystals/171?FV=ffe000ab&quantity=0&ColumnSort=0&pageSize=500&page=' + page
+    my_url = 'https://www.digikey.com/products/en/circuit-protection/tvs-varistors-movs/141?FV=ffe0008d&quantity=0&ColumnSort=0&k=varistors&pageSize=500&page=' + page
     user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
     headers = {'User-Agent': user_agent}
 
@@ -68,63 +68,75 @@ for page in pages:
 	    stts = container.find_all("td",{"class":"CLS 1989 ptable-param"})
 	    status = stts[0].text.strip()
 
-	    typ = container.find_all("td",{"class":"CLS 183 ptable-param"})
+	    AC = container.find_all("td",{"class":"CLS 0 ptable-param"})
 	    try:
-	    	typee = typ[0].text.strip()
+	    	max_AC_volts = AC[0].text.strip()
 	    except IndexError:
-	    	typee = 'null'
+	    	max_AC_volts = 'null'
 
-	    frq = container.find_all("td",{"class":"CLS 2150 ptable-param"})
+	    DC = container.find_all("td",{"class":"CLS 2152 ptable-param"})
 	    try:
-	    	freq = frq[0].text.strip()
+	    	max_DC_volts = DC[0].text.strip()
 	    except IndexError:
-	    	freq = 'null'
+	    	max_DC_volts = 'null'
 
-	    frq_s = container.find_all("td",{"class":"CLS 253 ptable-param"})
+	    vrs_min = container.find_all("td",{"class":"CLS 0 ptable-param"})
 	    try:
-	    	freq_stability = frq_s[0].text.strip()
+	    	varistor_voltage_min = vrs_min[0].text.strip()
 	    except IndexError:
-	    	freq_stability = 'null'
+	    	varistor_voltage_min = 'null'
 
-	    frq_t = container.find_all("td",{"class":"CLS 537 ptable-param"})
+	    vrs_typ = container.find_all("td",{"class":"CLS 2148 ptable-param"})
 	    try:
-	    	freq_tolerance = frq_t[0].text.strip()
+	    	varistor_voltage_typ = vrs_typ[0].text.strip()
 	    except IndexError:
-	    	freq_tolerance = 'null'
+	    	varistor_voltage_typ = 'null'
 
-	    load = container.find_all("td",{"class":"CLS 35 ptable-param"})
+	    vrs_max = container.find_all("td",{"class":"CLS 0 ptable-param"})
 	    try:
-	    	load_capacitance = load[0].text.strip()
+	    	varistor_voltage_max = vrs_max[0].text.strip()
 	    except IndexError:
-	    	load_capacitance = 'null'
+	    	varistor_voltage_max = 'null'
 
-	    esr = container.find_all("td",{"class":"CLS 2082 ptable-param"})
+	    srg = container.find_all("td",{"class":"CLS 116 ptable-param"})
 	    try:
-	    	e_s_resistance = esr[0].text.strip()
+	    	current_surge = srg[0].text.strip()
 	    except IndexError:
-	    	e_s_resistance = 'null'
+	    	current_surge = 'null'
 
-	    o_m = container.find_all("td",{"class":"CLS 538 ptable-param"})
+	    enrgy = container.find_all("td",{"class":"CLS 604 ptable-param"})
 	    try:
-	    	operating_mode = o_m[0].text.strip()
+	    	energy = enrgy[0].text.strip()
 	    except IndexError:
-	    	operating_mode = 'null'
+	    	energy = 'null'
 
-	    o_t = container.find_all("td",{"class":"CLS 252 ptable-param"})
+	    crcts = container.find_all("td",{"class":"CLS 2094 ptable-param"})
 	    try:
-	    	operating_temperature = o_t[0].text.strip()
+	    	number_of_circuits = crcts[0].text.strip()
+	    except IndexError:
+	    	number_of_circuits = 'null'
+
+	    cpctn = container.find_all("td",{"class":"CLS 2274 ptable-param"})
+	    try:
+	    	capacitance_frequency = cpctn[0].text.strip()
+	    except IndexError:
+	    	capacitance_frequency = 'null'
+
+	    tmprtr = container.find_all("td",{"class":"CLS 252 ptable-param"})
+	    try:
+	    	operating_temperature = tmprtr[0].text.strip()
 	    except IndexError:
 	    	operating_temperature = 'null'
 
-	    rtng = container.find_all("td",{"class":"CLS 707 ptable-param"})
+	    ftrs = container.find_all("td",{"class":"CLS 0 ptable-param"})
 	    try:
-	    	rating = rtng[0].text.strip()
+	    	features = ftrs[0].text.strip()
 	    except IndexError:
-	    	rating = 'null'
+	    	features = 'null'
 
-	    mntg = container.find_all("td",{"class":"CLS 69 ptable-param"})
+	    mntng = container.find_all("td",{"class":"CLS 69 ptable-param"})
 	    try:
-	    	mounting_type = mntg[0].text.strip()
+	    	mounting_type = mntng[0].text.strip()
 	    except IndexError:
 	    	mounting_type = 'null'
 
@@ -133,18 +145,6 @@ for page in pages:
 	    	package_case = pck[0].text.strip()
 	    except IndexError:
 	    	package_case = 'null'
-
-	    size = container.find_all("td",{"class":"CLS 46 ptable-param"})
-	    try:
-	    	size_dimension = size[0].text.strip()
-	    except IndexError:
-	    	size_dimension = 'null'
-
-	    hght = container.find_all("td",{"class":"CLS 1500 ptable-param"})
-	    try:
-	    	height_seated = hght[0].text.strip()
-	    except IndexError:
-	    	height_seated = 'null'
 
 	    #print("part_numbers; " + part_numbers)
 	    #print("price; " + price)
@@ -175,7 +175,7 @@ for page in pages:
 	    #print("size_dimension; " + size_dimension)
 	    #print("height_seated; " + height_seated)
 
-	    f.write(part_numbers_d + ";" + part_numbers + ";" + manufacturer + ";" + description + ";" + qty_available + ";" + price + ";" + min_qty + ";" + packaging + ";" + series + ";" + status + ";" + typee + ";" +  freq + ";" + freq_stability + ";" + freq_tolerance + ";" + load_capacitance + ";" + e_s_resistance + ";" + operating_mode + ";" + operating_temperature + ";" + rating + ";" + mounting_type + ";" + package_case  + ";" + size_dimension + ";" + height_seated + "\n")
+	    f.write(part_numbers_d + ";" + part_numbers + ";" + manufacturer + ";" + description + ";" + qty_available + ";" + price + ";" + min_qty + ";" + packaging + ";" + series + ";" + status + ";" + max_AC_volts + ";" +  max_DC_volts + ";" + varistor_voltage_min + ";" + varistor_voltage_typ + ";" + varistor_voltage_max + ";" + current_surge + ";" + energy + ";" + number_of_circuits + ";" + capacitance_frequency + ";" + operating_temperature + ";" + features + ";"  + mounting_type + ";" + package_case + "\n")
     
     print(page)
 

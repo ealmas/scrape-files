@@ -2,18 +2,18 @@ import bs4
 import requests
 from urllib.request import urlopen as uReq
 from bs4 import BeautifulSoup as soup
+import io
 from time import sleep
 from random import randint
 
-pages = [str(i) for i in range(1,119)]
+pages = [str(i) for i in range(1,17)]
 
-filename = "digikey_crystal.csv"
-f = open(filename, "w")
-header = "d_partnumber; mfg_partnumber; manufacturer; description; qty_available; unit_price; min_qty; packaging; series; status; typee; frequence; freq_stability; freq_tolerance; load_capacitance; esr; operating_mode;operating_temperature; ratings; mounting_type; package_case; size_dimension; height_seated\n"
-
+filename = "digikey_RF_antennas.csv"
+f = open(filename, "w", encoding="utf-8")
+header = "d_partnumber; mfg_partnumber; manufacturer; description; qty_available; unit_price; min_qty; packaging; series; status; rf_family; frequnecy_group; frequency; frequency_range; antenna_type; number_of_brands; vswr; return_loss; gain; power_max; features; termination; ingress_protection; mounting_type; height_seated; applications\n"
 for page in pages:
 
-    my_url = 'https://www.digikey.com/products/en/crystals-oscillators-resonators/crystals/171?FV=ffe000ab&quantity=0&ColumnSort=0&pageSize=500&page=' + page
+    my_url = 'https://www.digikey.com/products/en/rf-if-and-rfid/rf-antennas/875?FV=ffe0036b&quantity=0&ColumnSort=0&pageSize=500&page=' + page
     user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
     headers = {'User-Agent': user_agent}
 
@@ -68,83 +68,101 @@ for page in pages:
 	    stts = container.find_all("td",{"class":"CLS 1989 ptable-param"})
 	    status = stts[0].text.strip()
 
-	    typ = container.find_all("td",{"class":"CLS 183 ptable-param"})
+	    rf_fmly = container.find_all("td",{"class":"CLS 1883 ptable-param"})
 	    try:
-	    	typee = typ[0].text.strip()
+	    	rf_family = rf_fmly[0].text.strip()
 	    except IndexError:
-	    	typee = 'null'
+	    	rf_family = 'null'
 
-	    frq = container.find_all("td",{"class":"CLS 2150 ptable-param"})
+	    frqny_grp = container.find_all("td",{"class":"CLS 1850 ptable-param"})
+	    try:
+	    	frequnecy_group = frqny_grp[0].text.strip()
+	    except IndexError:
+	    	frequnecy_group = 'null'
+
+	    frq = container.find_all("td",{"class":"CLS 1851 ptable-param"})
 	    try:
 	    	freq = frq[0].text.strip()
 	    except IndexError:
 	    	freq = 'null'
 
-	    frq_s = container.find_all("td",{"class":"CLS 253 ptable-param"})
+	    frqncy_rng = container.find_all("td",{"class":"CLS 344 ptable-param"})
 	    try:
-	    	freq_stability = frq_s[0].text.strip()
+	    	frequency_range = frqncy_rng[0].text.strip()
 	    except IndexError:
-	    	freq_stability = 'null'
+	    	frequency_range = 'null'
 
-	    frq_t = container.find_all("td",{"class":"CLS 537 ptable-param"})
+	    typee = container.find_all("td",{"class":"CLS 965 ptable-param"})
 	    try:
-	    	freq_tolerance = frq_t[0].text.strip()
+	    	antenna_type = typee[0].text.strip()
 	    except IndexError:
-	    	freq_tolerance = 'null'
+	    	antenna_type = 'null'
 
-	    load = container.find_all("td",{"class":"CLS 35 ptable-param"})
+	    brands = container.find_all("td",{"class":"CLS 963 ptable-param"})
 	    try:
-	    	load_capacitance = load[0].text.strip()
+	    	number_of_brands = brands[0].text.strip()
 	    except IndexError:
-	    	load_capacitance = 'null'
+	    	number_of_brands = 'null'
 
-	    esr = container.find_all("td",{"class":"CLS 2082 ptable-param"})
+	    vsr = container.find_all("td",{"class":"CLS 964 ptable-param"})
 	    try:
-	    	e_s_resistance = esr[0].text.strip()
+	    	vswr = vsr[0].text.strip()
 	    except IndexError:
-	    	e_s_resistance = 'null'
+	    	vswr = 'null'
 
-	    o_m = container.find_all("td",{"class":"CLS 538 ptable-param"})
+	    rtrn_lss = container.find_all("td",{"class":"CLS 1166 ptable-param"})
 	    try:
-	    	operating_mode = o_m[0].text.strip()
+	    	return_loss = rtrn_lss[0].text.strip()
 	    except IndexError:
-	    	operating_mode = 'null'
+	    	return_loss = 'null'
 
-	    o_t = container.find_all("td",{"class":"CLS 252 ptable-param"})
+	    gn = container.find_all("td",{"class":"CLS 445 ptable-param"})
 	    try:
-	    	operating_temperature = o_t[0].text.strip()
+	    	gain = gn[0].text.strip()
 	    except IndexError:
-	    	operating_temperature = 'null'
+	    	gain = 'null'
 
-	    rtng = container.find_all("td",{"class":"CLS 707 ptable-param"})
+	    pwr = container.find_all("td",{"class":"CLS 2109 ptable-param"})
 	    try:
-	    	rating = rtng[0].text.strip()
+	    	power_max = pwr[0].text.strip()
 	    except IndexError:
-	    	rating = 'null'
+	    	power_max = 'null'
 
-	    mntg = container.find_all("td",{"class":"CLS 69 ptable-param"})
+	    ftrs = container.find_all("td",{"class":"CLS 5 ptable-param"})
 	    try:
-	    	mounting_type = mntg[0].text.strip()
+	    	features = ftrs[0].text.strip()
+	    except IndexError:
+	    	features = 'null'
+
+	    trmntn = container.find_all("td",{"class":"CLS 589 ptable-param"})
+	    try:
+	    	termination = trmntn[0].text.strip()
+	    except IndexError:
+	    	termination = 'null'
+
+	    ingrss = container.find_all("td",{"class":"CLS 697 ptable-param"})
+	    try:
+	    	ingress_protection = ingrss[0].text.strip()
+	    except IndexError:
+	    	ingress_protection = 'null'
+
+	    mntn = container.find_all("td",{"class":"CLS 69 ptable-param"})
+	    try:
+	    	mounting_type = mntn[0].text.strip()
 	    except IndexError:
 	    	mounting_type = 'null'
 
-	    pck = container.find_all("td",{"class":"CLS 16 ptable-param"})
-	    try:
-	    	package_case = pck[0].text.strip()
-	    except IndexError:
-	    	package_case = 'null'
-
-	    size = container.find_all("td",{"class":"CLS 46 ptable-param"})
-	    try:
-	    	size_dimension = size[0].text.strip()
-	    except IndexError:
-	    	size_dimension = 'null'
-
-	    hght = container.find_all("td",{"class":"CLS 1500 ptable-param"})
+	    hght = container.find_all("td",{"class":"CLS 966 ptable-param"})
 	    try:
 	    	height_seated = hght[0].text.strip()
 	    except IndexError:
 	    	height_seated = 'null'
+
+	    app = container.find_all("td",{"class":"CLS 405 ptable-param"})
+	    try:
+	    	applications = app[0].text.strip()
+	    except IndexError:
+	    	applications = 'null'
 
 	    #print("part_numbers; " + part_numbers)
 	    #print("price; " + price)
@@ -175,7 +193,7 @@ for page in pages:
 	    #print("size_dimension; " + size_dimension)
 	    #print("height_seated; " + height_seated)
 
-	    f.write(part_numbers_d + ";" + part_numbers + ";" + manufacturer + ";" + description + ";" + qty_available + ";" + price + ";" + min_qty + ";" + packaging + ";" + series + ";" + status + ";" + typee + ";" +  freq + ";" + freq_stability + ";" + freq_tolerance + ";" + load_capacitance + ";" + e_s_resistance + ";" + operating_mode + ";" + operating_temperature + ";" + rating + ";" + mounting_type + ";" + package_case  + ";" + size_dimension + ";" + height_seated + "\n")
+	    f.write(part_numbers_d + ";" + part_numbers + ";" + manufacturer + ";" + description + ";" + qty_available + ";" + price + ";" + min_qty + ";" + packaging + ";" + series + ";" + status + ";" + rf_family + ";" +  frequnecy_group + ";" + freq + ";" + frequency_range + ";" + antenna_type + ";" + number_of_brands + ";" + vswr + ";" + return_loss + ";" + gain + ";" + power_max + ";" + termination + ";" + ingress_protection + ";" + mounting_type + ";" + height_seated + ";" + applications + "\n")
     
     print(page)
 
